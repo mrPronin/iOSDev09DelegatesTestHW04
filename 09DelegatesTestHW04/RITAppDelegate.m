@@ -7,6 +7,9 @@
 //
 
 #import "RITAppDelegate.h"
+#import "RITPatient.h"
+#import "RITDoctor.h"
+#import "RITQuack.h"
 
 @implementation RITAppDelegate
 
@@ -16,6 +19,126 @@
     // Override point for customization after application launch.
     self.window.backgroundColor = [UIColor whiteColor];
     [self.window makeKeyAndVisible];
+    
+    // create patient objects
+    RITPatient* patient01   = [[RITPatient alloc] init];
+    patient01.name          = @"Viktor";
+    patient01.temperature   = 36.5f;
+    patient01.simptoms      = nil;
+    
+    RITPatient* patient02   = [[RITPatient alloc] init];
+    patient02.name          = @"Oleg";
+    patient02.temperature   = 39.2f;
+    patient02.bodyPart      = RITBodyPartsThroat;
+    patient02.simptoms      = [NSSet setWithObjects:
+                               @(RITSimptomsFever), @(RITSimptomsCough),
+                               @(RITSimptomsRunnyNose), @(RITSimptomsHeadAche),
+                               @(RITSimptomsFatigue),
+                               nil
+                               ];
+    
+    RITPatient* patient03   = [[RITPatient alloc] init];
+    patient03.name          = @"Piter";
+    patient03.temperature   = 36.3f;
+    patient03.bodyPart      = RITBodyPartsStomach;
+    patient03.simptoms      = [NSSet setWithObjects:
+                               @(RITSimptomsAbdominalPain),
+                               nil
+                               ];
+    
+    RITPatient* patient04   = [[RITPatient alloc] init];
+    patient04.name          = @"Sveta";
+    patient04.temperature   = 36.3f;
+    patient04.bodyPart      = RITBodyPartsHead;
+    patient04.simptoms      = [NSSet setWithObjects:
+                               @(RITSimptomsNausea),
+                               @(RITSimptomsTasteChange),
+                               @(RITSimptomsBloating),
+                               @(RITSimptomsHeadAche),
+                               nil
+                               ];
+    
+    RITPatient* patient05   = [[RITPatient alloc] init];
+    patient05.name          = @"Olga";
+    patient05.temperature   = 36.3f;
+    patient05.bodyPart      = RITBodyPartsHand;
+    patient05.simptoms      = [NSSet setWithObjects:
+                               @(RITSimptomsDryMouth),
+                               nil
+                               ];
+    
+    RITPatient* patient06   = [[RITPatient alloc] init];
+    patient06.name          = @"Michael";
+    patient06.temperature   = 36.3f;
+    patient06.bodyPart      = RITBodyPartsLeg;
+    patient06.simptoms      = [NSSet setWithObjects:
+                               @(RITSimptomsFatigue),
+                               nil
+                               ];
+    
+    RITPatient* patient07   = [[RITPatient alloc] init];
+    patient07.name          = @"Tanya";
+    patient07.temperature   = 36.3f;
+    patient07.bodyPart      = RITBodyPartsStomach;
+    patient07.simptoms      = [NSSet setWithObjects:
+                               @(RITSimptomsLossOfAppetite),
+                               nil
+                               ];
+    
+    // form list of patients
+    NSArray*    patients    = @[patient01, patient02, patient03, patient04, patient05, patient06, patient07];
+    
+    // create doctor objects
+    RITDoctor*  doctor      = [[RITDoctor alloc] init];
+    doctor.name             = @"Watson";
+    RITQuack*   quack01     = [[RITQuack alloc] init];
+    quack01.name            = @"Girlfriend";
+    RITQuack*   quack02     = [[RITQuack alloc] init];
+    quack02.name            = @"Neighbor";
+    RITDoctor*  doctor02    = [[RITDoctor alloc] init];
+    doctor02.name           = @"House";
+    
+    // form list of doctors
+    NSArray*    doctors     = @[doctor, quack01, quack02, doctor02];
+    
+    // establish doctors
+    for (RITPatient* patient in patients) {
+        patient.delegate = doctor;
+    }
+    
+    patient06.delegate  = quack01;
+    patient07.delegate  = quack02;
+    
+    // call the doctor
+    [patients makeObjectsPerformSelector:@selector(becameWorse)];
+    
+    // show statistics
+    [doctors makeObjectsPerformSelector:@selector(showStatistics)];
+    
+    [patients makeObjectsPerformSelector:@selector(showPatientSatisfaction)];
+    
+    // select unpleased patients
+    NSPredicate *pred = [NSPredicate predicateWithFormat:@"areYouPleased = NO"];
+    
+    NSArray*    dissatisfiedPatients    = [patients filteredArrayUsingPredicate:pred];
+    
+    // change doctor for unpleased patients
+    for (RITPatient* patient in dissatisfiedPatients) {
+        
+        id doctor = patient.delegate;
+        
+        while ([patient.delegate isEqual:doctor]) {
+            patient.delegate = doctors[arc4random() % 4];
+            patient.areYouPleased = YES;
+        }
+
+    }
+    
+    NSLog(@"\n");
+    NSLog(@"After reassignment");
+    
+    [patients makeObjectsPerformSelector:@selector(showPatientSatisfaction)];
+    
     return YES;
 }
 
